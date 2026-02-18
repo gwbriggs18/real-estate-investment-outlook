@@ -67,3 +67,7 @@ Real estate is **hypothetical only** (no property API): you supply purchase pric
 - **docker-compose:** Builds image, port 3000, `ALPHA_VANTAGE_API_KEY` from `.env`.
 
 Do not commit `.env`; use `.env.example` as a template.
+
+## Development Notes
+
+- Adjusted appreciation assumptions for real estate comparison.
