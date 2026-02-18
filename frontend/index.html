@@ -14,12 +14,29 @@
   <main>
     <section class="card address-card">
       <h2>Property value by address</h2>
-      <p class="address-intro">Get a current value estimate for a US address (RentCast AVM). Format: Street, City, State, Zip.</p>
+      <p class="address-intro">Get a current value estimate for a US address (RentCast AVM). Use the fields below; city has autocomplete suggestions for common cities.</p>
       <form id="address-form" class="address-form">
-        <label>
-          Full address
-          <input type="text" id="address" placeholder="123 Main St, Austin, TX, 78701" />
-        </label>
+        <div class="address-grid">
+          <label>
+            Street address
+            <input type="text" id="addrStreet" placeholder="123 Main St" />
+          </label>
+          <label class="address-city-label">
+            City
+            <input type="text" id="addrCity" autocomplete="off" placeholder="Austin" />
+            <div id="city-suggestions" class="city-suggestions"></div>
+          </label>
+          <label>
+            State
+            <select id="addrState">
+              <option value="">Select state</option>
+            </select>
+          </label>
+          <label>
+            ZIP
+            <input type="text" id="addrZip" inputmode="numeric" placeholder="78701" />
+          </label>
+        </div>
         <button type="submit" id="address-btn">Get value</button>
       </form>
       <div id="address-error" class="error" aria-live="assertive"></div>
@@ -58,6 +75,12 @@
               <input type="number" id="purchasePrice" min="0" step="any" placeholder="2000000" />
             </label>
             <label>
+              Or use a looked-up value
+              <select id="purchasePriceLookup" aria-label="Pre-fill purchase price from a previous address lookup">
+                <option value="">— Enter manually —</option>
+              </select>
+            </label>
+            <label>
               Down payment (%)
               <input type="number" id="downPaymentPercent" min="0" max="100" step="0.1" placeholder="20" />
             </label>
@@ -85,6 +108,11 @@
       </div>
       <div id="compare-error" class="error" aria-live="assertive"></div>
       <div id="compare-result" class="compare-result" aria-live="polite"></div>
+      <div id="chart-container" class="chart-container" aria-hidden="true" style="display: none;">
+        <h3>Value year over year</h3>
+        <p class="chart-caption">End-of-year value (stocks) or equity (real estate).</p>
+        <canvas id="compare-chart" width="800" height="400"></canvas>
+      </div>
     </section>
     <section class="card api-info">
       <h2>Data &amp; limits</h2>
@@ -92,6 +120,7 @@
       <p><strong>Real estate:</strong> <strong>Property value</strong> uses <strong>RentCast</strong> (50 free requests/month). Set <code>RENTCAST_API_KEY</code> in <code>.env</code>. <strong>Compare</strong> uses your entered purchase price, down payment, and rate (no API).</p>
     </section>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,17 @@
+{
+  "AL": ["Birmingham", "Montgomery", "Mobile", "Huntsville"],
+  "AZ": ["Phoenix", "Tucson", "Mesa", "Scottsdale"],
+  "CA": ["Los Angeles", "San Diego", "San Jose", "San Francisco", "Sacramento"],
+  "CO": ["Denver", "Colorado Springs", "Aurora", "Fort Collins"],
+  "FL": ["Miami", "Orlando", "Tampa", "Jacksonville"],
+  "GA": ["Atlanta", "Savannah", "Augusta", "Columbus"],
+  "IL": ["Chicago", "Aurora", "Naperville", "Springfield"],
+  "MA": ["Boston", "Worcester", "Springfield", "Cambridge"],
+  "NC": ["Charlotte", "Raleigh", "Greensboro", "Durham"],
+  "NY": ["New York", "Buffalo", "Rochester", "Albany"],
+  "OH": ["Columbus", "Cleveland", "Cincinnati", "Toledo"],
+  "PA": ["Philadelphia", "Pittsburgh", "Allentown", "Erie"],
+  "TX": ["Austin", "Dallas", "Houston", "San Antonio"],
+  "WA": ["Seattle", "Spokane", "Tacoma", "Bellevue"]
+}
+

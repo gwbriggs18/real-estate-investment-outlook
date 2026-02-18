@@ -2,30 +2,154 @@ const compareBtn = document.getElementById("compare-btn");
 const compareResult = document.getElementById("compare-result");
 const compareError = document.getElementById("compare-error");
 
-// Property value by address
+// Store address lookups so user can pick one for purchase price
+let savedLookups = [];
+
+function addLookupToDropdown(formattedAddress, price) {
+  savedLookups.push({ address: formattedAddress, price });
+  const sel = document.getElementById("purchasePriceLookup");
+  while (sel.options.length > 1) sel.remove(1);
+  savedLookups.forEach((lu, i) => {
+    const opt = document.createElement("option");
+    opt.value = String(lu.price);
+    opt.textContent = `${lu.address} — $${Number(lu.price).toLocaleString()}`;
+    sel.appendChild(opt);
+  });
+}
+
+document.getElementById("purchasePriceLookup").addEventListener("change", function () {
+  const val = this.value;
+  const purchaseInput = document.getElementById("purchasePrice");
+  if (val) purchaseInput.value = val;
+});
+
+// Property value by address with local state/city helpers
 const addressForm = document.getElementById("address-form");
 const addressBtn = document.getElementById("address-btn");
 const addressResult = document.getElementById("address-result");
 const addressError = document.getElementById("address-error");
+const addrStreetEl = document.getElementById("addrStreet");
+const addrCityEl = document.getElementById("addrCity");
+const addrStateEl = document.getElementById("addrState");
+const addrZipEl = document.getElementById("addrZip");
+const citySuggestionsEl = document.getElementById("city-suggestions");
+
+const US_STATES = [
+  ["AL", "Alabama"],
+  ["AZ", "Arizona"],
+  ["CA", "California"],
+  ["CO", "Colorado"],
+  ["FL", "Florida"],
+  ["GA", "Georgia"],
+  ["IL", "Illinois"],
+  ["MA", "Massachusetts"],
+  ["NC", "North Carolina"],
+  ["NY", "New York"],
+  ["OH", "Ohio"],
+  ["PA", "Pennsylvania"],
+  ["TX", "Texas"],
+  ["WA", "Washington"],
+];
+
+US_STATES.forEach(([code, name]) => {
+  const opt = document.createElement("option");
+  opt.value = code;
+  opt.textContent = `${code} – ${name}`;
+  addrStateEl.appendChild(opt);
+});
+
+let usCitiesByState = null;
+let citiesLoaded = false;
+
+async function ensureCitiesLoaded() {
+  if (citiesLoaded) return;
+  try {
+    const res = await fetch("us-cities.json");
+    if (!res.ok) return;
+    usCitiesByState = await res.json();
+    citiesLoaded = true;
+  } catch {
+    // ignore; suggestions will just not show
+  }
+}
+
+function hideCitySuggestions() {
+  citySuggestionsEl.style.display = "none";
+  citySuggestionsEl.innerHTML = "";
+}
+
+async function updateCitySuggestions() {
+  const state = addrStateEl.value;
+  const query = addrCityEl.value.trim().toLowerCase();
+  if (!state || query.length < 2) {
+    hideCitySuggestions();
+    return;
+  }
+  await ensureCitiesLoaded();
+  if (!usCitiesByState || !usCitiesByState[state]) {
+    hideCitySuggestions();
+    return;
+  }
+  const all = usCitiesByState[state];
+  const matches = all.filter((c) => c.toLowerCase().startsWith(query)).slice(0, 8);
+  if (matches.length === 0) {
+    hideCitySuggestions();
+    return;
+  }
+  citySuggestionsEl.innerHTML = "";
+  matches.forEach((city) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = city;
+    btn.addEventListener("click", () => {
+      addrCityEl.value = city;
+      hideCitySuggestions();
+      addrCityEl.focus();
+    });
+    citySuggestionsEl.appendChild(btn);
+  });
+  citySuggestionsEl.style.display = "block";
+}
+
+addrCityEl.addEventListener("input", () => {
+  updateCitySuggestions();
+});
+addrStateEl.addEventListener("change", () => {
+  updateCitySuggestions();
+});
+document.addEventListener("click", (e) => {
+  if (!citySuggestionsEl.contains(e.target) && e.target !== addrCityEl) {
+    hideCitySuggestions();
+  }
+});
 
 addressForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   addressError.textContent = "";
   addressResult.innerHTML = "";
-  const address = document.getElementById("address").value.trim();
-  if (!address) {
-    addressError.textContent = "Enter a full address (Street, City, State, Zip).";
+
+  const street = addrStreetEl.value.trim();
+  const city = addrCityEl.value.trim();
+  const state = addrStateEl.value;
+  const zip = addrZipEl.value.trim();
+  if (!street || !city || !state || !zip) {
+    addressError.textContent = "Enter street, city, state, and ZIP.";
     return;
   }
+  const address = `${street}, ${city}, ${state}, ${zip}`;
+
   addressBtn.disabled = true;
   try {
     const res = await fetch(`/api/real-estate/value?${new URLSearchParams({ address })}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Request failed");
+    const addr = data.formattedAddress || data.address || address;
+    const price = data.price != null ? Number(data.price) : null;
+    if (addr && price != null) addLookupToDropdown(addr, price);
     addressResult.innerHTML = `
       <dl>
-        <dt>Address</dt><dd>${data.formattedAddress || data.address}</dd>
-        <dt>Est. value</dt><dd>$${Number(data.price).toLocaleString()}</dd>
+        <dt>Address</dt><dd>${addr}</dd>
+        <dt>Est. value</dt><dd>$${price.toLocaleString()}</dd>
         ${data.priceRangeLow != null && data.priceRangeHigh != null ? `<dt>Range</dt><dd>$${Number(data.priceRangeLow).toLocaleString()} – $${Number(data.priceRangeHigh).toLocaleString()}</dd>` : ""}
       </dl>
     `;
@@ -76,18 +200,97 @@ compareBtn.addEventListener("click", async () => {
 
   compareBtn.disabled = true;
   try {
-    const res = await fetch(`/api/compare?${params}`);
-    const data = await res.json();
-    if (!res.ok) {
+    const [compareRes, tsRes] = await Promise.all([
+      fetch(`/api/compare?${params}`),
+      fetch(`/api/compare/time-series?${params}`),
+    ]);
+    const data = await compareRes.json();
+    if (!compareRes.ok) {
       throw new Error(data.error || "Request failed");
     }
     renderCompareResult(data);
+    const tsData = tsRes.ok ? await tsRes.json() : null;
+    renderCompareChart(tsData);
   } catch (err) {
     compareError.textContent = err.message;
+    renderCompareChart(null);
   } finally {
     compareBtn.disabled = false;
   }
 });
+
+let compareChartInstance = null;
+
+function renderCompareChart(tsData) {
+  const container = document.getElementById("chart-container");
+  const canvas = document.getElementById("compare-chart");
+  if (!tsData || (!tsData.stock && !tsData.realEstate) || !tsData.years || tsData.years.length === 0) {
+    container.style.display = "none";
+    if (compareChartInstance) {
+      compareChartInstance.destroy();
+      compareChartInstance = null;
+    }
+    return;
+  }
+  container.style.display = "block";
+  if (compareChartInstance) compareChartInstance.destroy();
+
+  const datasets = [];
+  if (tsData.stock && tsData.stock.values && tsData.stock.values.some(v => v != null)) {
+    datasets.push({
+      label: "Stocks (value)",
+      data: tsData.stock.values,
+      borderColor: "rgb(88, 166, 255)",
+      backgroundColor: "rgba(88, 166, 255, 0.1)",
+      fill: false,
+      tension: 0.2,
+      spanGaps: false,
+    });
+  }
+  if (tsData.realEstate && tsData.realEstate.values && tsData.realEstate.values.some(v => v != null)) {
+    datasets.push({
+      label: "Real estate (equity)",
+      data: tsData.realEstate.values,
+      borderColor: "rgb(63, 185, 80)",
+      backgroundColor: "rgba(63, 185, 80, 0.1)",
+      fill: false,
+      tension: 0.2,
+      spanGaps: false,
+    });
+  }
+  if (datasets.length === 0) {
+    container.style.display = "none";
+    return;
+  }
+
+  compareChartInstance = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels: tsData.years,
+      datasets,
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2,
+      plugins: {
+        legend: { position: "top" },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ctx.dataset.label + ": $" + (ctx.raw != null ? Number(ctx.raw).toLocaleString() : "—"),
+          },
+        },
+      },
+      scales: {
+        x: { title: { display: true, text: "Year" } },
+        y: {
+          title: { display: true, text: "Value ($)" },
+          ticks: { callback: (v) => "$" + Number(v).toLocaleString() },
+        },
+      },
+    },
+  });
+}
 
 function renderCompareResult(data) {
   const stock = data.stock;
