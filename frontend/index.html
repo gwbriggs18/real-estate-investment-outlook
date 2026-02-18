@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investment Outlook – Stock vs Real Estate</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Investment Outlook</h1>
+    <p>Compare hypothetical stock market investments with hypothetical real estate (same cash, same period).</p>
+  </header>
+  <main>
+    <section class="card compare-card">
+      <h2>Stock vs Real estate</h2>
+      <p class="compare-intro">Fill in at least one side. Use the same &ldquo;as of&rdquo; date to compare value on that date. For real estate, &ldquo;down payment&rdquo; is your cash invested (compare to stock amount).</p>
+      <div class="compare-form-grid">
+        <div class="scenario-panel">
+          <h3>Stocks</h3>
+          <form id="stock-form" class="scenario-form">
+            <label>
+              Ticker (e.g. VOO, AAPL)
+              <input type="text" id="symbol" placeholder="VOO" />
+            </label>
+            <label>
+              Amount invested ($)
+              <input type="number" id="investedAmount" min="0" step="any" placeholder="400000" />
+            </label>
+            <label>
+              Buy date
+              <input type="date" id="buyDate" />
+            </label>
+            <label>
+              Sell / as-of date (optional)
+              <input type="date" id="sellDate" />
+            </label>
+          </form>
+        </div>
+        <div class="scenario-panel">
+          <h3>Real estate</h3>
+          <form id="re-form" class="scenario-form">
+            <label>
+              Purchase price ($)
+              <input type="number" id="purchasePrice" min="0" step="any" placeholder="2000000" />
+            </label>
+            <label>
+              Down payment (%)
+              <input type="number" id="downPaymentPercent" min="0" max="100" step="0.1" placeholder="20" />
+            </label>
+            <label>
+              Interest rate (% annual)
+              <input type="number" id="annualInterestRate" min="0" step="0.01" placeholder="7" />
+            </label>
+            <label>
+              Buy date
+              <input type="date" id="reBuyDate" />
+            </label>
+            <label>
+              As-of date (value/equity on this date)
+              <input type="date" id="asOfDate" />
+            </label>
+            <label>
+              Annual appreciation (% optional)
+              <input type="number" id="annualAppreciationPercent" min="-50" step="0.1" placeholder="0" value="0" />
+            </label>
+          </form>
+        </div>
+      </div>
+      <div class="compare-actions">
+        <button type="button" id="compare-btn" class="btn-primary">Compare</button>
+      </div>
+      <div id="compare-error" class="error" aria-live="assertive"></div>
+      <div id="compare-result" class="compare-result" aria-live="polite"></div>
+    </section>
+    <section class="card api-info">
+      <h2>Data &amp; limits</h2>
+      <p><strong>Stocks:</strong> Historical prices use <strong>Alpha Vantage</strong> (adjusted for splits and dividends). Free tier: 25 requests/day. Set <code>ALPHA_VANTAGE_API_KEY</code> in your <code>.env</code>.</p>
+      <p><strong>Real estate:</strong> No API. You enter purchase price, down payment, and rate; we compute mortgage balance and equity at the as-of date. Optionally add annual appreciation % for estimated value growth.</p>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

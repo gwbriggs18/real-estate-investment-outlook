@@ -1,0 +1,8 @@
+node_modules
+.git
+.env
+.env.example
+.venv
+__pycache__
+*.pyc
+*.md
