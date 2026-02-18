@@ -1,10 +1,11 @@
 """
-Real estate API routes: hypothetical return (mortgage + equity at date).
+Real estate API routes: value by address (RentCast), hypothetical return (mortgage + equity).
 """
 
 from flask import Blueprint, request, jsonify
 
 from backend.services.real_estate import compute_hypothetical_real_estate
+from backend.services.rentcast import get_value_by_address
 
 real_estate_bp = Blueprint(
     "real_estate", __name__, url_prefix="/api/real-estate"
@@ -56,3 +57,22 @@ def hypothetical():
         return jsonify(result)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+
+@real_estate_bp.route("/value", methods=["GET"])
+def value_by_address():
+    """
+    GET ?address=Street, City, State, Zip
+    Returns current AVM value estimate for that address (RentCast; 50 free requests/month).
+    """
+    try:
+        address = (request.args.get("address") or "").strip()
+        if not address:
+            return jsonify({
+                "error": "Missing address. Use format: Street, City, State, Zip",
+            }), 400
+        result = get_value_by_address(address)
+        return jsonify(result)
+    except ValueError as e:
+        status = 503 if "API key" in str(e) or "RENTCAST" in str(e) else 400
+        return jsonify({"error": str(e)}), status

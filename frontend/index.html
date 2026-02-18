@@ -12,6 +12,19 @@
     <p>Compare hypothetical stock market investments with hypothetical real estate (same cash, same period).</p>
   </header>
   <main>
+    <section class="card address-card">
+      <h2>Property value by address</h2>
+      <p class="address-intro">Get a current value estimate for a US address (RentCast AVM). Format: Street, City, State, Zip.</p>
+      <form id="address-form" class="address-form">
+        <label>
+          Full address
+          <input type="text" id="address" placeholder="123 Main St, Austin, TX, 78701" />
+        </label>
+        <button type="submit" id="address-btn">Get value</button>
+      </form>
+      <div id="address-error" class="error" aria-live="assertive"></div>
+      <div id="address-result" class="address-result" aria-live="polite"></div>
+    </section>
     <section class="card compare-card">
       <h2>Stock vs Real estate</h2>
       <p class="compare-intro">Fill in at least one side. Use the same &ldquo;as of&rdquo; date to compare value on that date. For real estate, &ldquo;down payment&rdquo; is your cash invested (compare to stock amount).</p>
@@ -76,7 +89,7 @@
     <section class="card api-info">
       <h2>Data &amp; limits</h2>
       <p><strong>Stocks:</strong> Historical prices use <strong>Alpha Vantage</strong> (adjusted for splits and dividends). Free tier: 25 requests/day. Set <code>ALPHA_VANTAGE_API_KEY</code> in your <code>.env</code>.</p>
-      <p><strong>Real estate:</strong> No API. You enter purchase price, down payment, and rate; we compute mortgage balance and equity at the as-of date. Optionally add annual appreciation % for estimated value growth.</p>
+      <p><strong>Real estate:</strong> <strong>Property value</strong> uses <strong>RentCast</strong> (50 free requests/month). Set <code>RENTCAST_API_KEY</code> in <code>.env</code>. <strong>Compare</strong> uses your entered purchase price, down payment, and rate (no API).</p>
     </section>
   </main>
   <script src="app.js"></script>

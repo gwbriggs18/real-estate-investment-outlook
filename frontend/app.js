@@ -2,6 +2,40 @@ const compareBtn = document.getElementById("compare-btn");
 const compareResult = document.getElementById("compare-result");
 const compareError = document.getElementById("compare-error");
 
+// Property value by address
+const addressForm = document.getElementById("address-form");
+const addressBtn = document.getElementById("address-btn");
+const addressResult = document.getElementById("address-result");
+const addressError = document.getElementById("address-error");
+
+addressForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  addressError.textContent = "";
+  addressResult.innerHTML = "";
+  const address = document.getElementById("address").value.trim();
+  if (!address) {
+    addressError.textContent = "Enter a full address (Street, City, State, Zip).";
+    return;
+  }
+  addressBtn.disabled = true;
+  try {
+    const res = await fetch(`/api/real-estate/value?${new URLSearchParams({ address })}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Request failed");
+    addressResult.innerHTML = `
+      <dl>
+        <dt>Address</dt><dd>${data.formattedAddress || data.address}</dd>
+        <dt>Est. value</dt><dd>$${Number(data.price).toLocaleString()}</dd>
+        ${data.priceRangeLow != null && data.priceRangeHigh != null ? `<dt>Range</dt><dd>$${Number(data.priceRangeLow).toLocaleString()} – $${Number(data.priceRangeHigh).toLocaleString()}</dd>` : ""}
+      </dl>
+    `;
+  } catch (err) {
+    addressError.textContent = err.message;
+  } finally {
+    addressBtn.disabled = false;
+  }
+});
+
 compareBtn.addEventListener("click", async () => {
   compareError.textContent = "";
   compareResult.innerHTML = "";
