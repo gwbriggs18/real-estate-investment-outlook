@@ -70,4 +70,4 @@ Do not commit `.env`; use `.env.example` as a template.
 
 ## Development Notes
 
-- Adjusted appreciation assumptions for real estate comparison.
+- Refined S&P 500 historical growth explanation.
