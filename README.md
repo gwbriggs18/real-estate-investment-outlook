@@ -70,4 +70,4 @@ Do not commit `.env`; use `.env.example` as a template.
 
 ## Development Notes
 
-- Refined S&P 500 historical growth explanation.
+- Improved explanation of leverage impact in property investing.
