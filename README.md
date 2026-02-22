@@ -70,4 +70,4 @@ Do not commit `.env`; use `.env.example` as a template.
 
 ## Development Notes
 
-- Simplified investment horizon comparison example.
+- Improved explanation of leverage impact in property investing.
