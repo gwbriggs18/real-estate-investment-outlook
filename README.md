@@ -70,4 +70,4 @@ Do not commit `.env`; use `.env.example` as a template.
 
 ## Development Notes
 
-- Improved explanation of leverage impact in property investing.
+- Clarified rental yield calculation section.
