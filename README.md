@@ -70,4 +70,4 @@ Do not commit `.env`; use `.env.example` as a template.
 
 ## Development Notes
 
-- Clarified rental yield calculation section.
+- Refined S&P 500 historical growth explanation.
