@@ -70,4 +70,4 @@ Do not commit `.env`; use `.env.example` as a template.
 
 ## Development Notes
 
-- Adjusted appreciation assumptions for real estate comparison.
+- Updated inflation adjustment explanation.
