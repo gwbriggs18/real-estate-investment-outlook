@@ -70,4 +70,4 @@ Do not commit `.env`; use `.env.example` as a template.
 
 ## Development Notes
 
-- Updated inflation adjustment explanation.
+- Clarified rental yield calculation section.
